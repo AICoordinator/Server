@@ -19,7 +19,6 @@ from User import views
 from rest_framework import routers
 
 router = routers.DefaultRouter()
-router.register(r'user', views.UserViewSet)
 
 urlpatterns = [
     path('user/', include('User.urls')),

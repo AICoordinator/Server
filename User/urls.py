@@ -6,6 +6,9 @@ from rest_framework import routers
 
 app_name = 'User'
 
+
 urlpatterns = [
-    path('', include('rest_framework.urls', namespace='rest_framework_category')),
+    path("signup", views.SignupAPI.as_view()),
+    path("logout", views.LogoutAPI.as_view()),
+    path("login", views.LoginAPI.as_view())
 ]
