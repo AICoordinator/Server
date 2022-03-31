@@ -12,14 +12,13 @@ GENDER_CHOICES = (
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, nickname, gender,password, **extra_fields):
+    def create_user(self, email, password, gender, nickname):
         if not email:
             raise ValueError('The given email mist be set')
         user = self.model(
             email=self.normalize_email(email),
             gender=gender,
-            nickname=nickname,
-            **extra_fields
+            nickname=nickname
         )
 
         user.set_password(password)

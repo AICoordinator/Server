@@ -10,7 +10,8 @@ from .serializers import UserSerializer
 
 class SignupAPI(APIView):
     def post(self, request):
-        user = User.objects.create_user(username=request.data['email'], password=request.data['password'])
+        print("hello")
+        user = User.objects.create_user(email=request.data['email'], password=request.data['password'], gender=request.data['gender'], nickname=request.data['nickname'])
         user.save()
         token = Token.objects.create(user=user)
         return Response({"Token": token.key})
@@ -23,7 +24,7 @@ class SignupAPI(APIView):
 
 class LoginAPI(APIView):
     def post(self,request):
-        user = authenticate(username=request.data['email'], password=request.data['password'])
+        user = authenticate(email=request.data['email'], password=request.data['password'])
         if user is not None:
             token = Token.objects.get(user=user)
             # 로그인 하면 토큰 부여 예정 -> Android 에서가지고 있다가 사용 가능
