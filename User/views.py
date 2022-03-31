@@ -10,10 +10,12 @@ from .serializers import UserSerializer
 
 class SignupAPI(APIView):
     def post(self, request):
-        print("hello")
-        user = User.objects.create_user(email=request.data['email'], password=request.data['password'], gender=request.data['gender'], nickname=request.data['nickname'])
+        print(request.data['email'])
+        user = User.objects.create_user(email=request.POST.get('email'), password=request.data['password'], gender=request.data['gender'], nickname=request.data['nickname'])
         user.save()
+        #print("user type : " + type(user))
         token = Token.objects.create(user=user)
+        print(token.key)
         return Response({"Token": token.key})
     # 추가 구현 예정
     def get(self, request):
