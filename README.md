@@ -1,5 +1,11 @@
 # Server
 
+## Todo 4/6
+Login 후 User정보 + Token 같이보낼 Serializer 개발 -> 자동 로그인에 이용 + 어플 사용시 이용      
+
+
+
+
 ## User App 구현사항  
 Django 에서 제공하는 Token Authentication이용하여 로그인,로그아웃, 회원 가입 구현    
 그냥 ORM으로 User하면 Django 기능
