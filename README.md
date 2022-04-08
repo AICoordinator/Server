@@ -1,5 +1,11 @@
 # Server
 
+
+## Serializer 변경사항 
+로그인후 유저정보 + token 같이 가게 바꿈   ㅇㅇ    
+
+
+
 ## Todo 4/6
 Login 후 User정보 + Token 같이보낼 Serializer 개발 -> 자동 로그인에 이용 + 어플 사용시 이용      
 
