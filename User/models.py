@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager #장고에서 제공하는 유저 객체
 # Create your models here.
-
+from rest_framework.authtoken.models import Token
 GENDER_CHOICES = (
     (0, 'Female'),
     (1, 'Male'),
@@ -12,15 +12,14 @@ GENDER_CHOICES = (
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, password, gender, nickname):
+    def create_user(self, email, nickname, gender,password):
         if not email:
             raise ValueError('The given email mist be set')
         user = self.model(
             email=self.normalize_email(email),
             gender=gender,
-            nickname=nickname
+            nickname=nickname,
         )
-
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -42,10 +41,12 @@ class User(AbstractBaseUser):# Abstract User 상속받음
     objects = MyUserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['nickname']
-
     # Primary key 필요하다면 사용 -> 바꿔도됨
     """ def __str__(self):
         return "<%d %s>" % (self.pk, self.email)"""
+
+
+
     #기본
     def __str__(self):
         return self.email

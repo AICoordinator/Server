@@ -1,22 +1,23 @@
 from django.contrib.auth import authenticate, logout
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+
+from . import models
 from .models import User
 from .serializers import UserSerializer
-# Create your views here.
 
+
+# Create your views here.
 
 class SignupAPI(APIView):
     def post(self, request):
-        print(request.data['email'])
-        user = User.objects.create_user(email=request.POST.get('email'), password=request.data['password'], gender=request.data['gender'], nickname=request.data['nickname'])
+        user = User.objects.create_user(email=request.data['email'],gender=request.data['gender'],nickname=request.data['gender'],password=request.data['password'])
         user.save()
-        #print("user type : " + type(user))
-        token = Token.objects.create(user=user)
-        print(token.key)
-        return Response({"Token": token.key})
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
     # 추가 구현 예정
     def get(self, request):
         queryset = User.objects.all()
@@ -28,10 +29,11 @@ class LoginAPI(APIView):
     def post(self,request):
         user = authenticate(email=request.data['email'], password=request.data['password'])
         if user is not None:
-            token = Token.objects.get(user=user)
-            # 로그인 하면 토큰 부여 예정 -> Android 에서가지고 있다가 사용 가능
-            return Response({"Token": token.key})
+            serializer = UserSerializer(user)
+            print(serializer.data)
+            return Response(serializer.data)
         else:
+            print(1)
             return Response(status=401)
 
 
