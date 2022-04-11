@@ -32,9 +32,9 @@ class LoginAPI(APIView):
             serializer = UserSerializer(user)
             print(serializer.data)
             return Response(serializer.data)
-        else:
+    def get(self, request):
             print(1)
-            return Response(status=401)
+            return Response({"sex":"sex"})
 
 
 class LogoutAPI(APIView):
