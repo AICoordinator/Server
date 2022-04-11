@@ -34,7 +34,7 @@ class LoginAPI(APIView):
             return Response(serializer.data)
     def get(self, request):
             print(1)
-            return Response({"sex":"sex"})
+            return Response(status=200)
 
 
 class LogoutAPI(APIView):
