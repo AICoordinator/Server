@@ -8,6 +8,7 @@ from . import models
 from .models import User
 from .serializers import UserSerializer
 
+import json
 
 # Create your views here.
 
@@ -43,3 +44,8 @@ class LogoutAPI(APIView):
         request.user.auth_token.delete()
         logout(request)
         return Response('User Logged out successfully')
+
+
+def result(self, request):
+    data = json.loads(request.body.decode('utf-8'))
+    print(data)
