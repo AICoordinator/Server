@@ -11,7 +11,7 @@ from rest_framework.authtoken.models import Token
 
 from . import models
 from .forms import FileForm
-from .models import User
+from .models import User, File
 from .serializers import UserSerializer
 from pathlib import Path
 
@@ -57,15 +57,14 @@ class LogoutAPI(APIView):
 
 #동영상 받아와서 AI로 넘기는 view
 def result(request):
-    print("path : ")
-    print(Path(__file__).resolve().parent.parent)
     if request.method == 'POST':
+        userVideo = request.FILES.get('video')
+        print(userVideo)
+        newV = File()
+        newV.file = userVideo
+        newV.save()
         print("POST START")
-        form = FileForm(request.POST, request.FILES)
-        if form.is_valid():
-            file=request.FILES['video']
-            models.File(file).save()
-            return HttpResponseRedirect('/user/success')
+
     else:
         form = FileForm()
     
