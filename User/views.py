@@ -58,6 +58,8 @@ def result(request):
     print(Path(__file__).resolve().parent.parent)
     if request.method == 'POST':
         print("POST START")
+        video = request.FILES.get('video')
+        models.File(video).save()
         form = FileForm(request.POST, request.FILES)
         if form.is_valid():
             file=request.FILES['video']
@@ -67,16 +69,3 @@ def result(request):
         form = FileForm()
     
     return HttpResponseRedirect('/user/success')
-
-
-    #print("receive : " + videofile)
-
-# class Result(APIView):
-#     def post(self, request):
-#         print("function executed")
-#         if 'video' not in request.FILE:
-#             print("don't receive file well")
-#         else:
-#             data = request.FILE['video']
-#             print("print : " + data)
-#         return response(status = 200)
