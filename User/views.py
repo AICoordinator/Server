@@ -17,6 +17,9 @@ from pathlib import Path
 
 import json
 
+from pathlib import Path
+import os
+
 # Create your views here.
 
 class SignupAPI(APIView):
@@ -80,3 +83,12 @@ def result(request):
 #             data = request.FILE['video']
 #             print("print : " + data)
 #         return response(status = 200)
+
+class AICommunication(APIView):
+    def get(self,request):
+        import sys
+        a = os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(__file__))))))+'\\AI_Model\\attractiveness'
+        sys.path.append(a)
+        import linkingTest
+        linkingTest.linkingTest()
+        return Response(a)
