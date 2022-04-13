@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager #장고에서 제공하는 유저 객체
 # Create your models here.
 from rest_framework.authtoken.models import Token
+
 GENDER_CHOICES = (
     (0, 'Female'),
     (1, 'Male'),
@@ -9,7 +10,6 @@ GENDER_CHOICES = (
 )
 # User Manager -> 유저 DB 에 등록 해줌 (장고 제공)
 # 필요한 부분만 재정의 중
-
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, nickname, gender,password):
@@ -77,4 +77,5 @@ class User(AbstractBaseUser):# Abstract User 상속받음
         return self.is_admin
 
 
-
+class File(models.Model):
+    file = models.FileField(upload_to='files')
