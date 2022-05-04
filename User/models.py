@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager #장고에서 제공하는 유저 객체
 # Create your models here.
@@ -77,5 +79,12 @@ class User(AbstractBaseUser):# Abstract User 상속받음
         return self.is_admin
 
 
+def upload_to_local(instance, filename):
+    extension = os.path.splitext(filename)[-1].lower() # 확장자 추출
+    return ("/".join(
+        ["video", 'test']
+    ))+extension
+
+
 class File(models.Model):
-    file = models.FileField(upload_to='files')
+    file = models.FileField(upload_to=upload_to_local,null=True)
