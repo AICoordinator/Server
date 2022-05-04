@@ -1,4 +1,3 @@
-from curses.ascii import HT
 from http.client import HTTPResponse
 #from msilib.schema import File
 from urllib import response
@@ -14,12 +13,19 @@ from .forms import FileForm
 from .models import User, File
 from .serializers import UserSerializer
 from pathlib import Path
-
+from .test import test,get_opt
 import json
 
 from pathlib import Path
 import os
 
+import torch
+from .dataset import ImageDatasetTest
+from .networks import RegressionNetwork
+import argparse
+import os
+import torch.nn.functional as F
+from PIL import Image
 # Create your views here.
 
 class SignupAPI(APIView):
@@ -55,39 +61,33 @@ class LogoutAPI(APIView):
         logout(request)
         return Response('User Logged out successfully')
 
-#동영상 받아와서 AI로 넘기는 view
+
+#  동영상 받아와서 AI로 넘기는 view
 def result(request):
     if request.method == 'POST':
         userVideo = request.FILES.get('video')
         print(userVideo)
         newV = File()
         newV.file = userVideo
-        newV.save()
+        newV.save()  # 저장 됨
         print("POST START")
-
     else:
         form = FileForm()
     
     return HttpResponseRedirect('/user/success')
 
 
-    #print("receive : " + videofile)
-
-# class Result(APIView):
-#     def post(self, request):
-#         print("function executed")
-#         if 'video' not in request.FILE:
-#             print("don't receive file well")
-#         else:
-#             data = request.FILE['video']
-#             print("print : " + data)
-#         return response(status = 200)
-
 class AICommunication(APIView):
-    def get(self,request):
-        import sys
-        a = os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(__file__))))))+'\\AI_Model\\attractiveness'
-        sys.path.append(a)
-        import linkingTest
-        linkingTest.linkingTest()
-        return Response(a)
+    def get(self, request):
+        os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+        # Define model
+        model = RegressionNetwork()
+        # Load checkpoint
+        model.load_state_dict(torch.load("User/checkpoints/8000.pth"))
+        # Define dataloader
+        test_dataset = ImageDatasetTest(data_dir="User/samples")
+        test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=8, shuffle=False)
+        # Train the model
+        data = test(model, test_loader, "User/output")
+        print(data)
+        return Response(data)
