@@ -1,9 +1,11 @@
 import os
 
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser,BaseUserManager #장고에서 제공하는 유저 객체
+from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 # Create your models here.
 from rest_framework.authtoken.models import Token
+import base64
+from django.conf import settings
 
 GENDER_CHOICES = (
     (0, 'Female'),
@@ -32,6 +34,31 @@ class MyUserManager(BaseUserManager):
         user.is_admin = True
         user.save(using=self._db)
         return user
+
+class Result(models.Model):
+    # image1 = models.ImageField(default='media/images/1.jpeg')
+    # image2 = models.ImageField(default='media/images/2.jpeg')
+    # image3 = models.ImageField(default='media/images/3.jpeg')
+    # image4 = models.ImageField(default='media/images/4.jpeg')
+    # image5 = models.ImageField(default='media/images/5.jpeg')
+    # image6 = models.ImageField(default='media/images/6.jpeg')
+    # image7 = models.ImageField(default='media/images/7.jpeg')
+    # image8 = models.ImageField(default='media/images/8.jpeg')
+    # image9 = models.ImageField(default='media/images/9.jpeg')
+    # image10 = models.ImageField(default='media/images/10.jpeg')
+    image1 = models.TextField(null=True)
+    image2 = models.TextField(null=True)
+    image3 = models.TextField(null=True)
+    image4 = models.TextField(null=True)
+    image5 = models.TextField(null=True)
+    image6 = models.TextField(null=True)
+    image7 = models.TextField(null=True)
+    image8 = models.TextField(null=True)
+    image9 = models.TextField(null=True)
+    image10 = models.TextField(null=True)
+
+    class Meta:
+        db_table="result_images"
 
 
 class User(AbstractBaseUser):# Abstract User 상속받음
