@@ -94,7 +94,7 @@ def test(model, test_loader, opt):
             visualization.save(os.path.join(opt.output_dir, "grad_bot", os.path.basename(path[j])))
         # for j in range(len(output)):
         print(i)
-    
+
 if __name__ == '__main__':
     opt = get_opt()
     os.environ["CUDA_VISIBLE_DEVICES"] = opt.gpu_ids

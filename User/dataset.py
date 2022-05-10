@@ -2,7 +2,10 @@ import torch
 import os
 import torchvision
 from torchvision import transforms
+
 from PIL import Image
+
+
 # Define dataset class that inherits from torch.utils.data.Dataset and reads the images and labels from the given directory.
 class ImageDataset(torch.utils.data.Dataset):
     def __init__(self, data_dir, label_dir, mask_dir, transform):
@@ -23,10 +26,10 @@ class ImageDataset(torch.utils.data.Dataset):
                 if file_name.endswith('.jpg') or file_name.endswith('.png'):
                     if file_name in self.labels:
                         self.image_paths.append(os.path.join(dir_path, file_name))
-              
-        
-        
-        
+
+
+
+
     def __getitem__(self, index):
         image_path = self.image_paths[index]
         image_name = os.path.basename(image_path)
@@ -51,16 +54,15 @@ class ImageDatasetTest(torch.utils.data.Dataset):
         self.transform_mask =  transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor(),
                                                                                   ])
         self.image_paths = []
-        
 
         for dir_path, dir_names, file_names in os.walk(self.data_dir):
             for file_name in file_names:
                 if file_name.endswith('.jpg') or file_name.endswith('.png'):
                     self.image_paths.append(os.path.join(dir_path, file_name))
-              
-        
-        
-        
+
+
+
+
     def __getitem__(self, index):
         image_path = self.image_paths[index]
         image_name = os.path.basename(image_path)
