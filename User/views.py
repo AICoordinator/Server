@@ -7,25 +7,12 @@ from django.http import HttpResponseRedirect
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-
+MEDIA_URL = '/media/'
 from . import models
 from .forms import FileForm
 from .models import User, File
 from .serializers import UserSerializer
-from pathlib import Path
-from .test import test,get_opt
-import json
-
-from pathlib import Path
-import os
-
-import torch
-from .dataset import ImageDatasetTest
-from .networks import RegressionNetwork
-import argparse
-import os
-import torch.nn.functional as F
-from PIL import Image
+from .run import run_test
 # Create your views here.
 
 class SignupAPI(APIView):
@@ -70,6 +57,10 @@ def result(request):
         newV = File()
         newV.file = userVideo
         newV.save()  # 저장 됨
+        result = run_test('ata97@naver.com','User/samples/test.mp4', 'User/test', 5, 30,
+                          'User/checkpoints/best_model.pth', 'User/output', 30, '0')
+        # run_test('User/samples/test.mp4', 'User/test', 5, 30, 'User/checkpoints', '/User/output', 30, 4)
+        # newV.delete()
         print("POST START")
     else:
         form = FileForm()
@@ -78,24 +69,8 @@ def result(request):
 
 
 class AICommunication(APIView):
-    def get(self,request):
-        import sys
-        a = os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(__file__))))))+'\\AI_Model\\attractiveness'
-        sys.path.append(a)
-        import linkingTest
-        linkingTest.linkingTest()
-        return Response(a)
+    def get(self, request):
+        # 사진 - 값 순으로 정렬 됨.
+        result = run_test('ata97@naver.com','User/samples/test.mp4','User/test',5,30,'User/checkpoints/best_model.pth','User/output',30,'0')
 
-    # def get(self, request):
-    #     os.environ["CUDA_VISIBLE_DEVICES"] = '0'
-    #     # Define model
-    #     model = RegressionNetwork()
-    #     # Load checkpoint
-    #     model.load_state_dict(torch.load("User/checkpoints/8000.pth"))
-    #     # Define dataloader
-    #     test_dataset = ImageDatasetTest(data_dir="User/samples")
-    #     test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=8, shuffle=False)
-    #     # Train the model
-    #     data = test(model, test_loader, "User/output")
-    #     print(data)
-    #     return Response(data)
+        return Response(result)

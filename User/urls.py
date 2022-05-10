@@ -5,8 +5,6 @@ from User import views
 from rest_framework import routers
 
 app_name = 'User'
-
-
 urlpatterns = [
     path("signup", views.SignupAPI.as_view()),
     path("logout", views.LogoutAPI.as_view()),

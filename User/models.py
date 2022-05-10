@@ -46,9 +46,6 @@ class User(AbstractBaseUser):# Abstract User 상속받음
     # Primary key 필요하다면 사용 -> 바꿔도됨
     """ def __str__(self):
         return "<%d %s>" % (self.pk, self.email)"""
-
-
-
     #기본
     def __str__(self):
         return self.email
@@ -82,9 +79,30 @@ class User(AbstractBaseUser):# Abstract User 상속받음
 def upload_to_local(instance, filename):
     extension = os.path.splitext(filename)[-1].lower() # 확장자 추출
     return ("/".join(
-        ["video", 'test']
+        ["video", "test"]
     ))+extension
 
 
 class File(models.Model):
     file = models.FileField(upload_to=upload_to_local,null=True)
+
+
+def upload_to_originImage(instance,filename):
+    extension = os.path.splitext(filename)[-1].lower()  # 확장자 추출
+    return ("/".join(
+        ["userimage",'origin'+ instance.owner.email]
+    )) + extension
+
+
+def upload_to_changedImage(instance,filename):
+    extension = os.path.splitext(filename)[-1].lower()  # 확장자 추출
+    return ("/".join(
+        ["userimage", 'changed'+instance.owner.email]
+    )) + extension
+
+class UserImage(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    title = models.CharField(max_length=20)
+    score = models.CharField(max_length=20)
+    originImage = models.TextField(null=True)
+    changedImage = models.TextField(null=True)

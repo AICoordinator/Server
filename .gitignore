@@ -1,0 +1,9 @@
+/media
+
+db.sqlite3
+
+/User/checkpoints
+
+/User/samples
+/User/test
+/User/output
