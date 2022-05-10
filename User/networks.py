@@ -2,14 +2,11 @@ import torchvision
 from torch import nn
 import torch
 import torch.nn.functional as F
-<<<<<<< HEAD
 import copy
-from .resnet import Resnet18
-from torch.hub import load_state_dict_from_url
-
+from resnet import Resnet18
 from torchvision import transforms
-=======
->>>>>>> parent of 22f656c (complete receiving result images from server)
+
+
 # Define model class
 
 class RegressionNetwork(nn.Module):
@@ -18,10 +15,10 @@ class RegressionNetwork(nn.Module):
         resnet = torchvision.models.resnet18(pretrained=True)
         resnet.fc = nn.Linear(resnet.fc.in_features, 1)
         self.resnet = resnet
-    def forward(self, x, feat = False):
+
+    def forward(self, x, feat=False):
         x = self.resnet(x)
         # x = F.sigmoid(x) * 5 # scale the output to be between 0 and 5
-<<<<<<< HEAD
         return x.squeeze()
 
 
@@ -225,6 +222,7 @@ class Bottleneck(nn.Module):
 
         return out
 
+
 class ResNet(nn.Module):
 
     def __init__(self, block, layers, num_classes=1000, zero_init_residual=False,
@@ -246,7 +244,7 @@ class ResNet(nn.Module):
                              "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
         self.groups = groups
         self.base_width = width_per_group
-        
+
         self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
                                bias=False)
         self.bn1 = norm_layer(self.inplanes)
@@ -276,7 +274,7 @@ class ResNet(nn.Module):
             nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1, bias=True),
             nn.ReLU(inplace=True),
         )
-        
+
         # self.fc = nn.Linear(512 * block.expansion, num_classes)
 
         for m in self.modules():
@@ -320,14 +318,14 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def forward(self, x, return_feat = True):
+    def forward(self, x, return_feat=True):
         # See note [TorchScript super()]
         # print("x.shape:", x.shape)
- 
+
         # print("x.shape:", x.shape)
         x = self.conv1(x)
         # print("x.shape:", x.shape)
-        
+
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
@@ -339,7 +337,7 @@ class ResNet(nn.Module):
         x = self.layer3(x)
         skip3 = x
         # print("x.shape:", x.shape)
-        
+
         x = self.layer4(x)
         x = self.up1(x)
 
@@ -351,9 +349,9 @@ class ResNet(nn.Module):
         x = self.up3(x)
         x = x + skip1
         x = self.conv1x1(x)
-        
+
         # print("x.shape", x.shape)
-        x = torch.exp(x*0.01)
+        x = torch.exp(x * 0.01)
         if return_feat:
             feat = x
         x = self.avgpool(x)
@@ -387,6 +385,8 @@ def ResNet18(pretrained=False, progress=True, **kwargs):
     """
     return _resnet('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress,
                    **kwargs)
+
+
 def resnext50_32x4d(pretrained: bool = False, progress: bool = True, **kwargs) -> ResNet:
     r"""ResNeXt-50 32x4d model from
     `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_.
@@ -399,26 +399,29 @@ def resnext50_32x4d(pretrained: bool = False, progress: bool = True, **kwargs) -
     kwargs["width_per_group"] = 4
     return _resnet("resnext50_32x4d", Bottleneck, [3, 4, 6, 3], pretrained, progress, **kwargs)
 
+
 class RegressionNetwork2(nn.Module):
     def __init__(self):
         super(RegressionNetwork2, self).__init__()
         resnet = torchvision.models.resnet18(pretrained=True)
         resnet.fc = nn.Linear(resnet.fc.in_features, 1)
         self.resnet = resnet
-    def forward(self, x, feat = False):
+
+    def forward(self, x, feat=False):
         x = self.resnet(x)
         # x = F.sigmoid(x) * 5 # scale the output to be between 0 and 5
         return x.squeeze()
+
 
 class ConvBNReLU(nn.Module):
     def __init__(self, in_chan, out_chan, ks=3, stride=1, padding=1, *args, **kwargs):
         super(ConvBNReLU, self).__init__()
         self.conv = nn.Conv2d(in_chan,
-                out_chan,
-                kernel_size = ks,
-                stride = stride,
-                padding = padding,
-                bias = False)
+                              out_chan,
+                              kernel_size=ks,
+                              stride=stride,
+                              padding=padding,
+                              bias=False)
         self.bn = nn.BatchNorm2d(out_chan)
         self.init_weight()
 
@@ -432,6 +435,7 @@ class ConvBNReLU(nn.Module):
             if isinstance(ly, nn.Conv2d):
                 nn.init.kaiming_normal_(ly.weight, a=1)
                 if not ly.bias is None: nn.init.constant_(ly.bias, 0)
+
 
 class BiSeNetOutput(nn.Module):
     def __init__(self, in_chan, mid_chan, n_classes, *args, **kwargs):
@@ -467,7 +471,7 @@ class AttentionRefinementModule(nn.Module):
     def __init__(self, in_chan, out_chan, *args, **kwargs):
         super(AttentionRefinementModule, self).__init__()
         self.conv = ConvBNReLU(in_chan, out_chan, ks=3, stride=1, padding=1)
-        self.conv_atten = nn.Conv2d(out_chan, out_chan, kernel_size= 1, bias=False)
+        self.conv_atten = nn.Conv2d(out_chan, out_chan, kernel_size=1, bias=False)
         self.bn_atten = nn.BatchNorm2d(out_chan)
         self.sigmoid_atten = nn.Sigmoid()
         self.init_weight()
@@ -581,17 +585,17 @@ class FeatureFusionModule(nn.Module):
         super(FeatureFusionModule, self).__init__()
         self.convblk = ConvBNReLU(in_chan, out_chan, ks=1, stride=1, padding=0)
         self.conv1 = nn.Conv2d(out_chan,
-                out_chan//4,
-                kernel_size = 1,
-                stride = 1,
-                padding = 0,
-                bias = False)
-        self.conv2 = nn.Conv2d(out_chan//4,
-                out_chan,
-                kernel_size = 1,
-                stride = 1,
-                padding = 0,
-                bias = False)
+                               out_chan // 4,
+                               kernel_size=1,
+                               stride=1,
+                               padding=0,
+                               bias=False)
+        self.conv2 = nn.Conv2d(out_chan // 4,
+                               out_chan,
+                               kernel_size=1,
+                               stride=1,
+                               padding=0,
+                               bias=False)
         self.relu = nn.ReLU(inplace=True)
         self.sigmoid = nn.Sigmoid()
         self.init_weight()
@@ -635,7 +639,7 @@ class BiSeNet(nn.Module):
         self.conv_out = BiSeNetOutput(256, 256, n_classes)
         self.conv_out16 = BiSeNetOutput(128, 64, n_classes)
         self.conv_out32 = BiSeNetOutput(128, 64, n_classes)
-        self.norm =  transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+        self.norm = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         self.init_weight()
 
     def forward(self, x):
@@ -671,6 +675,3 @@ class BiSeNet(nn.Module):
                 wd_params += child_wd_params
                 nowd_params += child_nowd_params
         return wd_params, nowd_params, lr_mul_wd_params, lr_mul_nowd_params
-=======
-        return x.squeeze()
->>>>>>> parent of 22f656c (complete receiving result images from server)
