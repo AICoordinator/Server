@@ -2,11 +2,14 @@ import torchvision
 from torch import nn
 import torch
 import torch.nn.functional as F
+<<<<<<< HEAD
 import copy
 from .resnet import Resnet18
 from torch.hub import load_state_dict_from_url
 
 from torchvision import transforms
+=======
+>>>>>>> parent of 22f656c (complete receiving result images from server)
 # Define model class
 
 class RegressionNetwork(nn.Module):
@@ -18,6 +21,7 @@ class RegressionNetwork(nn.Module):
     def forward(self, x, feat = False):
         x = self.resnet(x)
         # x = F.sigmoid(x) * 5 # scale the output to be between 0 and 5
+<<<<<<< HEAD
         return x.squeeze()
 
 
@@ -667,3 +671,6 @@ class BiSeNet(nn.Module):
                 wd_params += child_wd_params
                 nowd_params += child_nowd_params
         return wd_params, nowd_params, lr_mul_wd_params, lr_mul_nowd_params
+=======
+        return x.squeeze()
+>>>>>>> parent of 22f656c (complete receiving result images from server)

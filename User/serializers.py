@@ -13,6 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
     def get_token(self, obj):
         token, created = Token.objects.get_or_create(user=obj)
         return token.key
+<<<<<<< HEAD
 """
 class Base64StringField(serializers.ModelSerializer):
     
@@ -26,3 +27,7 @@ class ImageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Result
         fields = '__all__''"""
+=======
+
+
+>>>>>>> parent of 22f656c (complete receiving result images from server)
