@@ -1,0 +1,7 @@
+media/
+User/migrations
+User/checkpoints
+User/samples
+User/output
+db.sqlite3
+
