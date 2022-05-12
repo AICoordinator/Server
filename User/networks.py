@@ -3,12 +3,11 @@ from torch import nn
 import torch
 import torch.nn.functional as F
 import copy
-from resnet import Resnet18
+from .resnet import Resnet18
 from torchvision import transforms
 
 
 # Define model class
-
 class RegressionNetwork(nn.Module):
     def __init__(self):
         super(RegressionNetwork, self).__init__()

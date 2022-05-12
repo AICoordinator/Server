@@ -7,11 +7,11 @@ from django.http import HttpResponseRedirect
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-
+from tensorflow.python.client import device_lib
 from . import models
 from .forms import FileForm
-from .models import User, File
-from .serializers import UserSerializer
+from .models import User, File,UserImage
+from .serializers import UserSerializer,UserImageSerializer
 from .run import run_test
 import os
 import torch.nn.functional as F
@@ -51,30 +51,32 @@ class LogoutAPI(APIView):
         logout(request)
         return Response('User Logged out successfully')
 
-def result(request):
-    if request.method == 'POST':
+class result(APIView):
+    def post(self,request):
         userVideo = request.FILES.get('video')
         print(userVideo)
         newV = File()
         newV.file = userVideo
         newV.save()  # 저장 됨
-        result = run_test('ata97@naver.com', 'User/samples/test.mp4', 'User/test', 5, 30,
-                          'User/checkpoints/best_model.pth', 'User/output', 30, '0')
-        # run_test('User/samples/test.mp4', 'User/test', 5, 30, 'User/checkpoints', '/User/output', 30, 4)
-        # newV.delete()
-        print("POST START")
-    else:
-        form = FileForm()
 
-    return HttpResponseRedirect('/user/success')
+        remained = UserImage.objects.filter(owner__email='ata97@naver.com')
+        remained.delete()
+        run_test('ata97@naver.com', 'User/samples/test.mp4', 'User/test', 5, 30, 'User/checkpoints/best_model.pth','User/output', 30, '0')
+        data = User.objects.get(email='ata97@naver.com')
+        serializer_data = UserImageSerializer(data)
+        return Response(serializer_data.data)
 
 
 class AICommunication(APIView):
     def get(self, request):
         # 사진 - 값 순으로 정렬 됨.
-        result = run_test('ata97@naver.com','User/samples/test.mp4','User/test',5,30,'User/checkpoints/best_model.pth','User/output',30,'0')
-
-        return Response(result)
+        print(device_lib.list_local_devices())
+        remained = UserImage.objects.filter(owner__email='ata97@naver.com')
+        remained.delete()
+        run_test('ata97@naver.com','User/samples/test.mp4','User/test',5,30,'User/checkpoints/best_model.pth','User/output',30,'0')
+        data = User.objects.get(email='ata97@naver.com')
+        serializer_data = UserImageSerializer(data)
+        return Response(serializer_data.data)
 
 
 #  동영상 받아와서 AI로 넘기는 view Test Code

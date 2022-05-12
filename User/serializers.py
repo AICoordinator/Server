@@ -1,12 +1,11 @@
 
-from User.models import User
+from .models import User,UserImage
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from django.conf import settings
 
 class UserSerializer(serializers.ModelSerializer):
     token = serializers.SerializerMethodField()
-
     class Meta:
         model = User
         fields = ('email','gender', 'nickname','token')
@@ -14,6 +13,23 @@ class UserSerializer(serializers.ModelSerializer):
     def get_token(self, obj):
         token, created = Token.objects.get_or_create(user=obj)
         return token.key
+
+
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserImage
+        fields = ('title','score','originImage','changedImage')
+        order_by = ['-score']
+
+
+class UserImageSerializer(serializers.ModelSerializer):
+    images = ImageSerializer(many=True,read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('email', 'images')
+
+
 
 """
 class Base64StringField(serializers.ModelSerializer):

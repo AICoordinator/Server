@@ -127,8 +127,9 @@ def upload_to_changedImage(instance,filename):
         ["userimage", 'changed'+instance.owner.email]
     )) + extension
 
+
 class UserImage(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    owner = models.ForeignKey(User,related_name='images', on_delete=models.CASCADE, null=True)
     title = models.CharField(max_length=20)
     score = models.CharField(max_length=20)
     originImage = models.TextField(null=True)
