@@ -41,11 +41,11 @@ def test(user_email, model, test_loader, output_dir):
     model.cuda()
 
     # make result list
-    for i, (image, path) in enumerate(test_loader):
+    for i, (image, path, image_big) in enumerate(test_loader):
         image = image.cuda()
         image.requires_grad_()
         output, feat = model(image, return_feat=True)
-        with open(os.path.join("User/output/output.txt"), "a") as f:
+        with open(os.path.join("User/output/output.txt"), "w") as f:
             for j in range(len(output)):
                 print(1)
                 f.write(os.path.basename(path[j]) + " " + str(output[j].item()) + "\n")
@@ -54,7 +54,7 @@ def test(user_email, model, test_loader, output_dir):
         feat.retain_grad()
         output_sum.backward()
         grayscale_cams = feat
-        grayscale_cams = F.interpolate(grayscale_cams, size=image.shape[2:], mode='bicubic', align_corners=True).squeeze()
+        grayscale_cams = F.interpolate(grayscale_cams, size=image_big.shape[2:], mode='bicubic',align_corners=True).squeeze()
 
         for j in range(len(output)):
             # Select top/bottom 10% pixels
@@ -70,7 +70,7 @@ def test(user_email, model, test_loader, output_dir):
             grayscale_cam_top = normalize(grayscale_cam_top).cpu().detach().numpy()
             grayscale_cam = normalize(grayscale_cam).cpu().detach().numpy()
 
-            img = (image[j]*0.5+0.5).detach().cpu().numpy().transpose(1,2,0)
+            img = (image_big[j]).detach().numpy().transpose(1, 2, 0)
             visualization = show_cam_on_image(img, grayscale_cam_top, use_rgb=True)
             # Save the Grad-CAM
             visualization = Image.fromarray(visualization)

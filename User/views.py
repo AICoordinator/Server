@@ -1,3 +1,5 @@
+import base64
+import time
 from http.client import HTTPResponse
 #from msilib.schema import File
 from urllib import response
@@ -10,14 +12,14 @@ from rest_framework.authtoken.models import Token
 from tensorflow.python.client import device_lib
 from . import models
 from .forms import FileForm
-from .models import User, File,UserImage
-from .serializers import UserSerializer,UserImageSerializer
+from .models import User, File,UserImage,Result
+from .serializers import UserSerializer,UserImageSerializer,Base64StringField
 from .run import run_test
 import os
 import torch.nn.functional as F
 from PIL import Image
 # Create your views here.
-
+from django.conf import settings
 class SignupAPI(APIView):
     def post(self, request):
         user = User.objects.create_user(email=request.data['email'],gender=request.data['gender'],nickname=request.data['gender'],password=request.data['password'])
@@ -53,34 +55,53 @@ class LogoutAPI(APIView):
 
 class result(APIView):
     def post(self,request):
-        userVideo = request.FILES.get('video')
-        print(userVideo)
-        newV = File()
-        newV.file = userVideo
-        newV.save()  # 저장 됨
-
+        print(device_lib.list_local_devices())
         remained = UserImage.objects.filter(owner__email='ata97@naver.com')
         remained.delete()
-        run_test('ata97@naver.com', 'User/samples/test.mp4', 'User/test', 5, 30, 'User/checkpoints/best_model.pth','User/output', 30, '0')
+        run_test('ata97@naver.com', 'User/samples/test.mp4', 'User/test', 5, 30, 'User/checkpoints/best_model.pth',
+                 'User/output', 30, '0')
         data = User.objects.get(email='ata97@naver.com')
         serializer_data = UserImageSerializer(data)
         return Response(serializer_data.data)
+
 
 
 class AICommunication(APIView):
     def get(self, request):
         # 사진 - 값 순으로 정렬 됨.
-        print(device_lib.list_local_devices())
         remained = UserImage.objects.filter(owner__email='ata97@naver.com')
         remained.delete()
-        run_test('ata97@naver.com','User/samples/test.mp4','User/test',5,30,'User/checkpoints/best_model.pth','User/output',30,'0')
+        run_test('ata97@naver.com', 'User/samples/test.mp4', 'User/test', 5, 30, 'User/checkpoints/best_model.pth',
+                 'User/output', 30, '0')
         data = User.objects.get(email='ata97@naver.com')
         serializer_data = UserImageSerializer(data)
         return Response(serializer_data.data)
 
 
+"""print(device_lib.list_local_devices())
+remained = UserImage.objects.filter(owner__email='ata97@naver.com')
+remained.delete()
+run_test('ata97@naver.com','User/samples/test.mp4','User/test',5,30,'User/checkpoints/best_model.pth','User/output',30,'0')
+data = User.objects.get(email='ata97@naver.com')
+serializer_data = UserImageSerializer(data)"""
+
+"""remained = UserImage.objects.filter(owner__email='ata97@naver.com')
+       remained.delete()
+       for i in range(1, 11):
+           user_image = UserImage()
+           user_image.owner = User.objects.get(email='ata97@naver.com')
+           with open(settings.MEDIA_ROOT + "/images/" + str(i) + ".jpeg", "rb") as image_file:
+               user_image.originImage = (base64.b64encode(image_file.read()).decode('utf-8'))
+               user_image.changedImage = (base64.b64encode(image_file.read()).decode('utf-8'))
+               user_image.title = str(i)
+               user_image.score = str(i)
+               user_image.save()
+       data = User.objects.get(email='ata97@naver.com')
+       serializer_data = UserImageSerializer(data)
+       return Response(serializer_data.data)"""
+
 #  동영상 받아와서 AI로 넘기는 view Test Code
-"""
+
 class ResultAPI(APIView):
     def post(self, request):
         if request.method == 'POST':
@@ -113,10 +134,10 @@ class ResultAPI(APIView):
             serializer = Base64StringField(result)
 
             print("hello")
-            print(serializer.data)
+            #print(serializer.data)
             print("hello")
             return Response(serializer.data)
         else:
             form = FileForm()
             return Response(status = 500)
-    """
+

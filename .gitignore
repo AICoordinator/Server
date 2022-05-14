@@ -3,5 +3,6 @@ User/migrations
 User/checkpoints
 User/samples
 User/output
+User/test
 db.sqlite3
 

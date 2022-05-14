@@ -11,7 +11,7 @@ urlpatterns = [
     path("signup", views.SignupAPI.as_view()),
     path("logout", views.LogoutAPI.as_view()),
     path("login", views.LoginAPI.as_view()),
-    # path("result", views.ResultAPI.as_view()),
+    #path("result", views.ResultAPI.as_view()),
     path("ai", views.AICommunication.as_view()),
     path("result", views.result.as_view()),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
