@@ -13,7 +13,7 @@ from tensorflow.python.client import device_lib
 from . import models
 from .forms import FileForm
 from .models import User, File,UserImage,Result
-from .serializers import UserSerializer,UserImageSerializer,Base64StringField
+from .serializers import UserSerializer,UserImageSerializer
 from .run import run_test
 import os
 import torch.nn.functional as F
@@ -64,8 +64,6 @@ class result(APIView):
         serializer_data = UserImageSerializer(data)
         return Response(serializer_data.data)
 
-
-
 class AICommunication(APIView):
     def get(self, request):
         # 사진 - 값 순으로 정렬 됨.
@@ -76,68 +74,4 @@ class AICommunication(APIView):
         data = User.objects.get(email='ata97@naver.com')
         serializer_data = UserImageSerializer(data)
         return Response(serializer_data.data)
-
-
-"""print(device_lib.list_local_devices())
-remained = UserImage.objects.filter(owner__email='ata97@naver.com')
-remained.delete()
-run_test('ata97@naver.com','User/samples/test.mp4','User/test',5,30,'User/checkpoints/best_model.pth','User/output',30,'0')
-data = User.objects.get(email='ata97@naver.com')
-serializer_data = UserImageSerializer(data)"""
-
-"""remained = UserImage.objects.filter(owner__email='ata97@naver.com')
-       remained.delete()
-       for i in range(1, 11):
-           user_image = UserImage()
-           user_image.owner = User.objects.get(email='ata97@naver.com')
-           with open(settings.MEDIA_ROOT + "/images/" + str(i) + ".jpeg", "rb") as image_file:
-               user_image.originImage = (base64.b64encode(image_file.read()).decode('utf-8'))
-               user_image.changedImage = (base64.b64encode(image_file.read()).decode('utf-8'))
-               user_image.title = str(i)
-               user_image.score = str(i)
-               user_image.save()
-       data = User.objects.get(email='ata97@naver.com')
-       serializer_data = UserImageSerializer(data)
-       return Response(serializer_data.data)"""
-
-#  동영상 받아와서 AI로 넘기는 view Test Code
-
-class ResultAPI(APIView):
-    def post(self, request):
-        if request.method == 'POST':
-            userVideo = request.FILES.get('video')
-            print(userVideo)
-            newV = File()
-            newV.file = userVideo
-            newV.save()  # 저장 됨
-            # for i in range(1, 11):
-            #     with open(settings.MEDIA_ROOT + "/images/" + str(i) + ".jpeg", "rb") as image_file:
-            #         images.append(base64.b64encode(image_file.read()).decode('utf-8'))
-            # for i in range(1, 11):
-            #     images.append(str(i))
-            # jsondata = json.dumps({'list' : images})
-            images = []
-            for i in range(1, 11):
-                with open(settings.MEDIA_ROOT + "/images/" + str(i) +  ".jpeg", "rb") as image_file:
-                        images.append(base64.b64encode(image_file.read()).decode('utf-8'))
-            result = Result.objects.all()
-            result.image1 = images[0]
-            result.image2 = images[1]
-            result.image3 = images[2]
-            result.image4 = images[3]
-            result.image5 = images[4]
-            result.image6 = images[5]
-            result.image7 = images[6]
-            result.image8 = images[7]
-            result.image9 = images[8]
-            result.image10 = images[9]
-            serializer = Base64StringField(result)
-
-            print("hello")
-            #print(serializer.data)
-            print("hello")
-            return Response(serializer.data)
-        else:
-            form = FileForm()
-            return Response(status = 500)
 

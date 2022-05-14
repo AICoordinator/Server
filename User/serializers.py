@@ -20,6 +20,7 @@ class ImageSerializer(serializers.ModelSerializer):
         model = UserImage
         fields = ('title','score','originImage','changedImage')
 
+
 class UserImageSerializer(serializers.ModelSerializer):
     images = ImageSerializer(many=True,read_only=True)
 
@@ -27,18 +28,7 @@ class UserImageSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email', 'images')
 
-
-
-class Base64StringField(serializers.ModelSerializer):
-    
-    class Meta:
-        model = Result
-        fields = ('image1','image2','image3','image4','image5',
-        'image6','image7','image8','image9','image10')
-
-
-class ImageSerializer(serializers.HyperlinkedModelSerializer):
-
-    class Meta:
-        model = Result
-        fields = '__all__'
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response["images"] = sorted(response["images"], key=lambda x: x["score"],reverse=True)
+        return response
