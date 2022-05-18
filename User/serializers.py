@@ -1,5 +1,5 @@
 
-from .models import User,UserImage,Result
+from .models import User,UserImage
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from django.conf import settings
@@ -18,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserImage
-        fields = ('title','score','originImage','changedImage')
+        fields = ('title', 'score', 'originImage', 'changedImage')
 
 
 class UserImageSerializer(serializers.ModelSerializer):

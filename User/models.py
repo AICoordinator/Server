@@ -35,32 +35,6 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-class Result(models.Model):
-    # image1 = models.ImageField(default='media/images/1.jpeg')
-    # image2 = models.ImageField(default='media/images/2.jpeg')
-    # image3 = models.ImageField(default='media/images/3.jpeg')
-    # image4 = models.ImageField(default='media/images/4.jpeg')
-    # image5 = models.ImageField(default='media/images/5.jpeg')
-    # image6 = models.ImageField(default='media/images/6.jpeg')
-    # image7 = models.ImageField(default='media/images/7.jpeg')
-    # image8 = models.ImageField(default='media/images/8.jpeg')
-    # image9 = models.ImageField(default='media/images/9.jpeg')
-    # image10 = models.ImageField(default='media/images/10.jpeg')
-    image1 = models.TextField(null=True)
-    image2 = models.TextField(null=True)
-    image3 = models.TextField(null=True)
-    image4 = models.TextField(null=True)
-    image5 = models.TextField(null=True)
-    image6 = models.TextField(null=True)
-    image7 = models.TextField(null=True)
-    image8 = models.TextField(null=True)
-    image9 = models.TextField(null=True)
-    image10 = models.TextField(null=True)
-
-    class Meta:
-        db_table="result_images"
-
-
 class User(AbstractBaseUser):# Abstract User 상속받음
     email = models.EmailField(verbose_name="email", max_length=255, unique=True)
     gender = models.SmallIntegerField(choices=GENDER_CHOICES, default=2)
@@ -105,12 +79,14 @@ class User(AbstractBaseUser):# Abstract User 상속받음
 
 def upload_to_local(instance, filename):
     extension = os.path.splitext(filename)[-1].lower() # 확장자 추출
+    name = instance.owner.split('.')[0]
     return ("/".join(
-        ["video", "test"]
+        ["video",name]
     ))+extension
 
 
 class File(models.Model):
+    owner = models.EmailField(verbose_name="email", max_length=255,null=True)
     file = models.FileField(upload_to=upload_to_local,null=True)
 
 
@@ -130,7 +106,7 @@ def upload_to_changedImage(instance,filename):
 
 class UserImage(models.Model):
     owner = models.ForeignKey(User,related_name='images', on_delete=models.CASCADE, null=True)
-    title = models.CharField(max_length=20)
+    title = models.CharField(max_length=250)
     score = models.CharField(max_length=20)
     originImage = models.TextField(null=True)
     changedImage = models.TextField(null=True)
