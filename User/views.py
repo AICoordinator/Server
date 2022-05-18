@@ -1,25 +1,12 @@
-import base64
 import time
-from http.client import HTTPResponse
-#from msilib.schema import File
 from math import floor
-from urllib import response
 from django.contrib.auth import authenticate, logout
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
-from tensorflow.python.client import device_lib
-from . import models
-from .forms import FileForm
 from .models import User, File,UserImage
 from .serializers import UserSerializer,UserImageSerializer,ImageSerializer
 from .run import run_test
-import os
-import torch.nn.functional as F
-from PIL import Image
-# Create your views here.
+
 from django.conf import settings
 
 class SignupAPI(APIView):
@@ -66,6 +53,7 @@ class result(APIView):
         unique_key = str(floor(time.time() * 100))
         run_test('ata97@naver.com', unique_key, 5, 30, 30)
         end = time.time()
+
         print(f"total time : {end - start: .5f} sec")
         data = UserImage.objects.filter(owner__email='ata97@naver.com', title__icontains=unique_key).order_by('-score')
         serializer_data = ImageSerializer(data, many=True)

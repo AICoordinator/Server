@@ -44,6 +44,7 @@ def extract_images(user_email, video_path, save_path, num_images=10, interval = 
 def test(user_email, model,save_path, test_loader):
     test_start = time.time()
     # make result list
+    delete_images = []
     for i, (image, path, image_big) in enumerate(test_loader):
         image = image.cuda()
         image.requires_grad_()
@@ -57,7 +58,6 @@ def test(user_email, model,save_path, test_loader):
         output_sum.backward()
         grayscale_cams = feat
         grayscale_cams = F.interpolate(grayscale_cams, size=image_big.shape[2:], mode='bicubic',align_corners=True).squeeze()
-
         for j in range(len(output)):
             # Select top/bottom 10% pixels
             grayscale_cam = grayscale_cams[j]
@@ -86,10 +86,12 @@ def test(user_email, model,save_path, test_loader):
                 user_image.changedImage = (base64.b64encode(bytearr.getvalue()).decode('utf-8'))
                 user_image.title = save_path+os.path.basename(path[j])
                 print('a   ' + user_image.title)
+                delete_images.append(user_image.title)
                 user_image.score = str(round(float(output[j].item()) *20, 1))
                 user_image.save()
     test_end = time.time()
-
+    delete_thread = threading.Thread(target=delete_image, args=(delete_images,))
+    delete_thread.start()
     print(f"function time : {test_end - test_start: .5f} sec")
 
 
@@ -125,6 +127,7 @@ def getVedioPath(user_email):
     print(video_path + '.mp4')
     return 'User/media/video/'+video_path+'.mp4'
 
+
 def get_test_data_root(user_email,unique_key):
     return 'User/pimages/'+user_email+'/'+unique_key+'/'
 
@@ -134,3 +137,9 @@ def delete_video(user_email, video_path):
     file.delete()
     if os.path.isfile(video_path):
         os.remove(video_path)
+
+
+def delete_image(image_path):
+    for image in image_path:
+        if os.path.isfile(image):
+            os.remove(image)
