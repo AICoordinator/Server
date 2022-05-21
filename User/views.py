@@ -45,17 +45,20 @@ class LogoutAPI(APIView):
 
 class result(APIView):
     def post(self,request):
+        print(request.auth)
+        user = request.user
+
         userVideo = request.FILES.get('video')
-        newV = File(file=userVideo, owner='ata97@naver.com')
+        newV = File(file=userVideo, owner= user.email)
         newV.save()
 
         start = time.time()
         unique_key = str(floor(time.time() * 100))
-        run_test('ata97@naver.com', unique_key, 5, 30, 30)
+        run_test(user.email, unique_key, 5, 30, 30)
         end = time.time()
 
         print(f"total time : {end - start: .5f} sec")
-        data = UserImage.objects.filter(owner__email='ata97@naver.com', title__icontains=unique_key).order_by('-score')
+        data = UserImage.objects.filter(owner__email=user.email, title__icontains=unique_key).order_by('-score')
         serializer_data = ImageSerializer(data, many=True)
         return Response(serializer_data.data)
 
