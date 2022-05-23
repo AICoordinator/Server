@@ -16,6 +16,7 @@ from .run import run_test
 import os
 import torch.nn.functional as F
 from PIL import Image
+import time
 # Create your views here.
 
 class SignupAPI(APIView):
@@ -78,7 +79,6 @@ class AICommunication(APIView):
 
 
 #  동영상 받아와서 AI로 넘기는 view Test Code
-"""
 class ResultAPI(APIView):
     def post(self, request):
         if request.method == 'POST':
@@ -93,6 +93,7 @@ class ResultAPI(APIView):
             # for i in range(1, 11):
             #     images.append(str(i))
             # jsondata = json.dumps({'list' : images})
+            time.sleep(20)
             images = []
             for i in range(1, 11):
                 with open(settings.MEDIA_ROOT + "/images/" + str(i) +  ".jpeg", "rb") as image_file:
@@ -117,4 +118,3 @@ class ResultAPI(APIView):
         else:
             form = FileForm()
             return Response(status = 500)
-    """

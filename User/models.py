@@ -36,16 +36,6 @@ class MyUserManager(BaseUserManager):
         return user
 
 class Result(models.Model):
-    # image1 = models.ImageField(default='media/images/1.jpeg')
-    # image2 = models.ImageField(default='media/images/2.jpeg')
-    # image3 = models.ImageField(default='media/images/3.jpeg')
-    # image4 = models.ImageField(default='media/images/4.jpeg')
-    # image5 = models.ImageField(default='media/images/5.jpeg')
-    # image6 = models.ImageField(default='media/images/6.jpeg')
-    # image7 = models.ImageField(default='media/images/7.jpeg')
-    # image8 = models.ImageField(default='media/images/8.jpeg')
-    # image9 = models.ImageField(default='media/images/9.jpeg')
-    # image10 = models.ImageField(default='media/images/10.jpeg')
     image1 = models.TextField(null=True)
     image2 = models.TextField(null=True)
     image3 = models.TextField(null=True)
