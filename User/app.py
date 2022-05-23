@@ -7,9 +7,9 @@ import torch
 class UserConfig(AppConfig):
     name = 'user'
     model = ResNet18()
-    model.load_state_dict(torch.load('User/checkpoints/best_model.pth'))
+    model.load_state_dict(torch.load('User/checkpoints/best_model.pth',map_location='cpu'))
     model.eval()
-    model.cuda()
+    # model.cuda()
 
     def ready(self):
         # TODO: Write your codes to run on startup

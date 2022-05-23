@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-e9+(i-wu(a!-s7w-$tf$w$#f4h-cp+vf8_$rab9q4=yv46f*a$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 AUTH_USER_MODEL = 'User.User' # User 새로 정의
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['.us-west-1.compute.amazonaws.com' ]
 FILE_UPLOAD_HANDLERS = [
     'django.core.files.uploadhandler.MemoryFileUploadHandler',
     'django.core.files.uploadhandler.TemporaryFileUploadHandler',
