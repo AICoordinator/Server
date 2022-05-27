@@ -46,7 +46,7 @@ def test(user_email, model,save_path, test_loader):
     # make result list
     delete_images = []
     for i, (image, path, image_big) in enumerate(test_loader):
-        image = image.cuda()
+        image = image
         image.requires_grad_()
         output, feat = model(image, return_feat=True)
         """ with open(os.path.join("User/output/output.txt"), "w") as f:
@@ -112,7 +112,6 @@ def run_test(user_email,unique_key, num_images, interval, batch_size):
     end_extract = time.time()
     print(f"extract image time : {end_extract - start_extract: .5f} sec")
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
     # Define dataloader
     test_dataset = ImageDatasetTest(data_dir=test_dataroot)
     test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)

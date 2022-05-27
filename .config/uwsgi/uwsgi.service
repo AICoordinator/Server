@@ -1,0 +1,15 @@
+[Unit]
+Description=uWSGI service
+After=syslog.target
+
+[Service]
+ExecStart=/home/cbr/.conda/envs/venv/bin/uwsgi -i /home/cbr/ai_coordinator/Server/.config/uwsgi/AI_Stylist_Back_end.ini
+
+Restart=always
+KillSignal=SIGQUIT
+Type=notify
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target
