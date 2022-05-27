@@ -80,46 +80,14 @@ class AICommunication(APIView):
         serializer_data = ImageSerializer(data,many=True)
         return Response(serializer_data.data)
 
-#  동영상 받아와서 AI로 넘기는 view Test Code
-class ResultAPI(APIView):
-    def post(self, request):
-        if request.method == 'POST':
-            userVideo = request.FILES.get('video')
-            print(userVideo)
-            newV = File()
-            newV.file = userVideo
-            newV.save()  # 저장 됨
-            # for i in range(1, 11):
-            #     with open(settings.MEDIA_ROOT + "/images/" + str(i) + ".jpeg", "rb") as image_file:
-            #         images.append(base64.b64encode(image_file.read()).decode('utf-8'))
-            # for i in range(1, 11):
-            #     images.append(str(i))
-            # jsondata = json.dumps({'list' : images})
-            time.sleep(20)
-            images = []
-            for i in range(1, 11):
-                with open(settings.MEDIA_ROOT + "/images/" + str(i) +  ".jpeg", "rb") as image_file:
-                        images.append(base64.b64encode(image_file.read()).decode('utf-8'))
-            result = Result.objects.all()
-            result.image1 = images[0]
-            result.image2 = images[1]
-            result.image3 = images[2]
-            result.image4 = images[3]
-            result.image5 = images[4]
-            result.image6 = images[5]
-            result.image7 = images[6]
-            result.image8 = images[7]
-            result.image9 = images[8]
-            result.image10 = images[9]
-            serializer = Base64StringField(result)
-
-            print("hello")
-            print(serializer.data)
-            print("hello")
-            return Response(serializer.data)
-        else:
-            form = FileForm()
-            return Response(status = 500)
 
 class ProfileAPI(APIView):
     def post(self, request):
+        print(request.auth)
+        print(request.user)
+        user = request.user
+        if user is None :
+            return Response(404)
+        data = UserImage.objects.filter(owner__email=user.email).reverse()
+        serializer_data = ImageSerializer(data,many=True)
+        return Response(serializer_data.data)
