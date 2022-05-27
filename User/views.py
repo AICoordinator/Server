@@ -1,23 +1,18 @@
-from http.client import HTTPResponse
-#from msilib.schema import File
-from urllib import response
+import time
+from math import floor
 from django.contrib.auth import authenticate, logout
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
-
-from . import models
-from .forms import FileForm
-from .models import User, File
-from .serializers import UserSerializer
+from .models import User, File,UserImage
+from .serializers import UserSerializer,UserImageSerializer,ImageSerializer
 from .run import run_test
 import os
 import torch.nn.functional as F
 from PIL import Image
 import time
 # Create your views here.
+
+from django.conf import settings
 
 class SignupAPI(APIView):
     def post(self, request):
@@ -52,31 +47,40 @@ class LogoutAPI(APIView):
         logout(request)
         return Response('User Logged out successfully')
 
-def result(request):
-    if request.method == 'POST':
+
+class result(APIView):
+    def post(self,request):
+        print(request.auth)
+        user = request.user
+
         userVideo = request.FILES.get('video')
-        print(userVideo)
-        newV = File()
-        newV.file = userVideo
-        newV.save()  # 저장 됨
-        result = run_test('ata97@naver.com', 'User/samples/test.mp4', 'User/test', 5, 30,
-                          'User/checkpoints/best_model.pth', 'User/output', 30, '0')
-        # run_test('User/samples/test.mp4', 'User/test', 5, 30, 'User/checkpoints', '/User/output', 30, 4)
-        # newV.delete()
-        print("POST START")
-    else:
-        form = FileForm()
+        newV = File(file=userVideo, owner= user.email)
+        newV.save()
 
-    return HttpResponseRedirect('/user/success')
+        start = time.time()
+        unique_key = str(floor(time.time() * 100))
+        run_test(user.email, unique_key, 5, 30, 30)
+        end = time.time()
 
+        print(f"total time : {end - start: .5f} sec")
+        data = UserImage.objects.filter(owner__email=user.email, title__icontains=unique_key).order_by('-score')
+        serializer_data = ImageSerializer(data, many=True)
+        return Response(serializer_data.data)
 
 class AICommunication(APIView):
     def get(self, request):
         # 사진 - 값 순으로 정렬 됨.
-        result = run_test('ata97@naver.com','User/samples/test.mp4','User/test',5,30,'User/checkpoints/best_model.pth','User/output',30,'0')
+        """print(time.time())
+        a = str(floor(time.time() * 100))
+        user_email = 'ata97@naver.com'+'/'+a
+        print(user_email)"""
+        unique_key = str(floor(time.time() * 100))
+        run_test('ata97@naver.com', unique_key, 5, 30, 30)
+        data = UserImage.objects.filter(owner__email='ata97@naver.com',title__icontains=unique_key)
+        serializer_data = ImageSerializer(data,many=True)
+        return Response(serializer_data.data)
 
-        return Response(result)
-
+<<<<<<< HEAD
 
 #  동영상 받아와서 AI로 넘기는 view Test Code
 class ResultAPI(APIView):

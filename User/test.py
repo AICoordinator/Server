@@ -1,7 +1,7 @@
 # python3 test.py --gpu_ids 0 --test_dataroot ./samples --ckpt ./checkpoints/8000.pth
 import torch
-from dataset import ImageDatasetTest
-from networks import ResNet18, resnext50_32x4d
+from .dataset import ImageDatasetTest
+from .networks import ResNet18, resnext50_32x4d
 import argparse
 import os
 import torch.nn.functional as F

@@ -95,12 +95,14 @@ class User(AbstractBaseUser):# Abstract User 상속받음
 
 def upload_to_local(instance, filename):
     extension = os.path.splitext(filename)[-1].lower() # 확장자 추출
+    name = instance.owner.split('.')[0]
     return ("/".join(
-        ["video", "test"]
+        ["video",name]
     ))+extension
 
 
 class File(models.Model):
+    owner = models.EmailField(verbose_name="email", max_length=255,null=True)
     file = models.FileField(upload_to=upload_to_local,null=True)
 
 
@@ -117,9 +119,10 @@ def upload_to_changedImage(instance,filename):
         ["userimage", 'changed'+instance.owner.email]
     )) + extension
 
+
 class UserImage(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
-    title = models.CharField(max_length=20)
+    owner = models.ForeignKey(User,related_name='images', on_delete=models.CASCADE, null=True)
+    title = models.CharField(max_length=250)
     score = models.CharField(max_length=20)
     originImage = models.TextField(null=True)
     changedImage = models.TextField(null=True)
