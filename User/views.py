@@ -80,8 +80,6 @@ class AICommunication(APIView):
         serializer_data = ImageSerializer(data,many=True)
         return Response(serializer_data.data)
 
-<<<<<<< HEAD
-
 #  동영상 받아와서 AI로 넘기는 view Test Code
 class ResultAPI(APIView):
     def post(self, request):
@@ -122,3 +120,6 @@ class ResultAPI(APIView):
         else:
             form = FileForm()
             return Response(status = 500)
+
+class ProfileAPI(APIView):
+    def post(self, request):
