@@ -5,3 +5,5 @@ User/output
 User/test
 db.sqlite3
 User/pimages
+User/__pycache__/
+AI_Stylist_Back_end/__pycache__/
