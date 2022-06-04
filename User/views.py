@@ -17,7 +17,7 @@ from django.conf import settings
 
 class SignupAPI(APIView):
     def post(self, request):
-        if User.objects.filter(email=request.data['email']) is not None:
+        if User.objects.filter(email=request.data['email']):
             return Response(status=400)
         user = User.objects.create_user(email=request.data['email'],gender=request.data['gender'],nickname=request.data['nickname'],password=request.data['password'])
         user.pvalue = random.uniform(0, 5)
