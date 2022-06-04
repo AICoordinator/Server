@@ -19,7 +19,9 @@ import numpy as np
 from PIL import Image
 from .models import UserImage
 import io
+from torchvision.utils import save_image
 save_path = 'User/test'
+output_dir = 'User/test/'
 
 def extract_images(user_email, video_path, save_path, num_images=10, interval = 30):
     # Load the video
@@ -41,53 +43,165 @@ def extract_images(user_email, video_path, save_path, num_images=10, interval = 
     delete_thread.start()
 
 
-def test(user_email, model,save_path, test_loader):
+def test(user_email, model,model_mask, save_path, test_loader):
     test_start = time.time()
     # make result list
     delete_images = []
     for i, (image, path, image_big) in enumerate(test_loader):
         image = image
+        image_big = image_big
         image.requires_grad_()
         output, feat = model(image, return_feat=True)
         """ with open(os.path.join("User/output/output.txt"), "w") as f:
             for j in range(len(output)):
                 f.write(os.path.basename(path[j]) + " " + str(output[j].item()) + "\n")"""
+        segmap = model_mask(image_big)[0]
+        segmap = F.interpolate(segmap, size=(image.shape[2], image.shape[3]), mode='nearest')
+        segmap = segmap.detach().argmax(1).unsqueeze(1)
 
+        mask_skin = (segmap == 1).type(torch.float32) + (segmap == 2).type(torch.float32) + (segmap == 3).type(torch.float32)
+        mask_nose = (segmap == 10).type(torch.float32)
+        mask_eyes = (segmap == 4).type(torch.float32) + (segmap == 5).type(torch.float32)
+        mask_ears = (segmap == 7).type(torch.float32) + (segmap == 8).type(torch.float32)
+        mask_mouth = (segmap == 11).type(torch.float32) + (segmap == 12).type(torch.float32) + (segmap == 13).type(torch.float32)
+        mask_hair = (segmap == 17).type(torch.float32)
+        mask_others = torch.ones_like(mask_skin) - mask_skin - mask_nose - mask_eyes - mask_ears - mask_mouth - mask_hair
+
+        region_skin = mask_skin * (image * 0.5 + 0.5)
+        region_nose = mask_nose * (image * 0.5 + 0.5)
+        region_eyes = mask_eyes * (image * 0.5 + 0.5)
+        region_ears = mask_ears * (image * 0.5 + 0.5)
+        region_mouth = mask_mouth * (image * 0.5 + 0.5)
+        region_hair = mask_hair * (image * 0.5 + 0.5)
+
+        save_image(region_skin, os.path.join(output_dir, "skin.jpg"))
+        save_image(region_nose, os.path.join(output_dir, "nose.jpg"))
+        save_image(region_eyes, os.path.join(output_dir, "eyes.jpg"))
+        save_image(region_ears, os.path.join(output_dir, "ears.jpg"))
+        save_image(region_mouth, os.path.join(output_dir, "mouth.jpg"))
+        save_image(region_hair, os.path.join(output_dir, "hair.jpg"))
+
+        print(f"feat.shape : {feat.shape}, mask_skin.shape : {mask_skin.shape}")
         output_sum = torch.sum(output)
         feat.retain_grad()
         output_sum.backward()
+
         grayscale_cams = feat
-        grayscale_cams = F.interpolate(grayscale_cams, size=image_big.shape[2:], mode='bicubic',align_corners=True).squeeze()
+        print(f"grayscale_cams.shape : {grayscale_cams.shape}")
+        print(f"mask_skin.shape : {mask_skin.shape}")
+
+        grayscale_cams = F.interpolate(grayscale_cams, size=image.shape[2:], mode='bicubic', align_corners=True)
+        print(f"grayscale_cam  s.shape : {grayscale_cams.shape}")
+
+        offset = 20
+        score_skin = offset - (grayscale_cams * mask_skin).sum(dim=(1, 2, 3)) / mask_skin.sum(dim=(1, 2, 3))
+        score_nose = offset - (grayscale_cams * mask_nose).sum(dim=(1, 2, 3)) / mask_nose.sum(dim=(1, 2, 3))
+        score_eyes = offset - (grayscale_cams * mask_eyes).sum(dim=(1, 2, 3)) / mask_eyes.sum(dim=(1, 2, 3))
+        score_ears = offset - (grayscale_cams * mask_ears).sum(dim=(1, 2, 3)) / mask_ears.sum(dim=(1, 2, 3))
+        score_mouth = offset - (grayscale_cams * mask_mouth).sum(dim=(1, 2, 3)) / mask_mouth.sum(dim=(1, 2, 3))
+        score_hair = offset - (grayscale_cams * mask_hair).sum(dim=(1, 2, 3)) / mask_hair.sum(dim=(1, 2, 3))
+
+        # if nan, assign 5
+        score_skin[torch.isnan(score_skin)] = offset
+        score_nose[torch.isnan(score_nose)] = offset
+        score_eyes[torch.isnan(score_eyes)] = offset
+        score_ears[torch.isnan(score_ears)] = offset
+        score_mouth[torch.isnan(score_mouth)] = offset
+        score_hair[torch.isnan(score_hair)] = offset
+
+        std_skin = grayscale_cams[mask_skin.type(torch.bool)].std()
+        std_nose = grayscale_cams[mask_nose.type(torch.bool)].std()
+        std_eyes = grayscale_cams[mask_eyes.type(torch.bool)].std()
+        std_ears = grayscale_cams[mask_ears.type(torch.bool)].std()
+        std_mouth = grayscale_cams[mask_mouth.type(torch.bool)].std()
+        std_hair = grayscale_cams[mask_hair.type(torch.bool)].std()
+
+        # If std is less than 1e-4, std = 1
+        std_skin[std_skin < 1e-4] = 1
+        std_nose[std_nose < 1e-4] = 1
+        std_eyes[std_eyes < 1e-4] = 1
+        std_ears[std_ears < 1e-4] = 1
+        std_mouth[std_mouth < 1e-4] = 1
+        std_hair[std_hair < 1e-4] = 1
+
+        # print std
+        print(f"std_skin : {std_skin}")
+        print(f"std_nose : {std_nose}")
+        print(f"std_eyes : {std_eyes}")
+        print(f"std_ears : {std_ears}")
+        print(f"std_mouth : {std_mouth}")
+        print(f"std_hair : {std_hair}")
+
+        # Check if grayscale_cams contains nan
+        if torch.isnan(grayscale_cams).any():
+            print("grayscale_cams contains nan")
+            print(grayscale_cams)
+            raise NotImplementedError
+
+        score_mean_skin = (offset - score_skin).mean()
+        score_mean_nose = (offset - score_nose).mean()
+        score_mean_eyes = (offset - score_eyes).mean()
+        score_mean_ears = (offset - score_ears).mean()
+        score_mean_mouth = (offset - score_mouth).mean()
+        score_mean_hair = (offset - score_hair).mean()
+
+        print(f"score_mean_skin: {score_mean_skin}")
+        print(f"score_mean_nose: {score_mean_nose}")
+        print(f"score_mean_eyes: {score_mean_eyes}")
+        print(f"score_mean_ears: {score_mean_ears}")
+        print(f"score_mean_mouth: {score_mean_mouth}")
+        print(f"score_mean_hair: {score_mean_hair}")
+
         for j in range(len(output)):
             # Select top/bottom 10% pixels
             grayscale_cam = grayscale_cams[j]
-            print("grayscale_cam min max", grayscale_cam.min(), grayscale_cam.max())
-            k = grayscale_cam.shape[-1] * grayscale_cam.shape[-2] // 10
-            top_k, _ = torch.topk(grayscale_cam.flatten(), k=k)
-            bottom_k, _ = torch.topk(-grayscale_cam.flatten(), k=k)
-            bottom_k *= -1
-            grayscale_cam_top = torch.maximum(top_k.min(), grayscale_cam)
-            grayscale_cam_bot = torch.minimum(bottom_k.max(), grayscale_cam)
-            grayscale_cam_bot = normalize(grayscale_cam_bot).cpu().detach().numpy()
-            grayscale_cam_top = normalize(grayscale_cam_top).cpu().detach().numpy()
-            grayscale_cam = normalize(grayscale_cam).cpu().detach().numpy()
+            print(f"grayscale_cam.shape : {grayscale_cam.shape}")
 
-            img = (image_big[j]).detach().numpy().transpose(1, 2, 0)
-            visualization = show_cam_on_image(img, grayscale_cam_top, use_rgb=True)
+            grayscale_cam -= mask_skin[j] * score_mean_skin
+            grayscale_cam -= mask_nose[j] * score_mean_nose
+            grayscale_cam -= mask_eyes[j] * score_mean_eyes
+            grayscale_cam -= mask_ears[j] * score_mean_ears
+            grayscale_cam -= mask_mouth[j] * score_mean_mouth
+            grayscale_cam -= mask_hair[j] * score_mean_hair
+
+            # Divide by std
+            grayscale_cam[mask_skin[j].type(torch.bool)] = grayscale_cam[mask_skin[j].type(torch.bool)] / std_skin
+            grayscale_cam[mask_nose[j].type(torch.bool)] = grayscale_cam[mask_nose[j].type(torch.bool)] / std_nose
+            grayscale_cam[mask_eyes[j].type(torch.bool)] = grayscale_cam[mask_eyes[j].type(torch.bool)] / std_eyes
+            # grayscale_cam[mask_ears[j].type(torch.bool)] = grayscale_cam[mask_ears[j].type(torch.bool)] / std_ears
+            grayscale_cam[mask_mouth[j].type(torch.bool)] = grayscale_cam[mask_mouth[j].type(torch.bool)] / std_mouth
+            grayscale_cam[mask_hair[j].type(torch.bool)] = grayscale_cam[mask_hair[j].type(torch.bool)] / std_hair
+
+            print(f"skin: {(grayscale_cam[mask_skin[j].type(torch.bool)]).mean()}")
+            print(f"nose: {(grayscale_cam[mask_nose[j].type(torch.bool)]).mean()}")
+            print(f"eyes: {(grayscale_cam[mask_eyes[j].type(torch.bool)]).mean()}")
+            print(f"ears: {(grayscale_cam[mask_ears[j].type(torch.bool)]).mean()}")
+            print(f"mouth: {(grayscale_cam[mask_mouth[j].type(torch.bool)]).mean()}")
+            print(f"hair: {(grayscale_cam[mask_hair[j].type(torch.bool)]).mean()}")
+
+            print(f"---------------------------")
+
+            grayscale_cam = normalize(grayscale_cam)
+            grayscale_cam[mask_others[j].type(torch.bool)] = 0
+            # save_image(grayscale_cam, f"{output_dir}/{j}_map.jpg")
+            grayscale_cam = grayscale_cam.cpu().detach().numpy().squeeze()
+            img = (image[j]).cpu().detach().numpy().transpose(1, 2, 0) * 0.5 + 0.5
+            visualization = show_cam_on_image(img, grayscale_cam, use_rgb=True)
             # Save the Grad-CAM
             visualization = Image.fromarray(visualization)
-            #visualization.save(os.path.join(output_dir, os.path.basename(path[j])))
+            print(output[j].item())
             user_image = UserImage()
-            user_image.owner = User.objects.get(email=user_email)
+            user = User.objects.get(email=user_email)
+            user_image.owner = user
             bytearr = io.BytesIO()
             visualization.save(bytearr, format="jpeg")
             with open(save_path + os.path.basename(path[j]), "rb") as image_file:
                 user_image.originImage = (base64.b64encode(image_file.read()).decode('utf-8'))
                 user_image.changedImage = (base64.b64encode(bytearr.getvalue()).decode('utf-8'))
-                user_image.title = save_path+os.path.basename(path[j])
+                user_image.title = save_path + os.path.basename(path[j])
                 print('a   ' + user_image.title)
                 delete_images.append(user_image.title)
-                user_image.score = str(round(float(output[j].item()) *20, 1))
+                user_image.score = str(round((float(output[j].item()) + user.pvalue) * 20, 1))
                 user_image.save()
     test_end = time.time()
     delete_thread = threading.Thread(target=delete_image, args=(delete_images,))
@@ -116,7 +230,7 @@ def run_test(user_email,unique_key, num_images, interval, batch_size):
     test_dataset = ImageDatasetTest(data_dir=test_dataroot)
     test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
     # Inference
-    return test(user_email, UserConfig.model,test_dataroot, test_loader)
+    return test(user_email, UserConfig.model,UserConfig.model_mask, test_dataroot, test_loader)
 
 
 def getVedioPath(user_email):
