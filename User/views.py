@@ -6,6 +6,11 @@ from rest_framework.response import Response
 from .models import User, File,UserImage
 from .serializers import UserSerializer,UserImageSerializer,ImageSerializer
 from .run import run_test
+import os
+import torch.nn.functional as F
+from PIL import Image
+import time
+# Create your views here.
 
 from django.conf import settings
 
@@ -75,3 +80,14 @@ class AICommunication(APIView):
         serializer_data = ImageSerializer(data,many=True)
         return Response(serializer_data.data)
 
+
+class ProfileAPI(APIView):
+    def post(self, request):
+        print(request.auth)
+        print(request.user)
+        user = request.user
+        if user is None :
+            return Response(404)
+        data = UserImage.objects.filter(owner__email=user.email).reverse()
+        serializer_data = ImageSerializer(data,many=True)
+        return Response(serializer_data.data)

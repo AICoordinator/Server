@@ -35,6 +35,22 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+class Result(models.Model):
+    image1 = models.TextField(null=True)
+    image2 = models.TextField(null=True)
+    image3 = models.TextField(null=True)
+    image4 = models.TextField(null=True)
+    image5 = models.TextField(null=True)
+    image6 = models.TextField(null=True)
+    image7 = models.TextField(null=True)
+    image8 = models.TextField(null=True)
+    image9 = models.TextField(null=True)
+    image10 = models.TextField(null=True)
+
+    class Meta:
+        db_table="result_images"
+
+
 class User(AbstractBaseUser):# Abstract User 상속받음
     email = models.EmailField(verbose_name="email", max_length=255, unique=True)
     gender = models.SmallIntegerField(choices=GENDER_CHOICES, default=2)
